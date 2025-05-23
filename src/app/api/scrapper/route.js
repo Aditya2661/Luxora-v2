@@ -54,8 +54,13 @@ export async function POST(request) {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
     });
     const page = await context.newPage();
-
-    const searchQuery = 'iphones';
+     // In your API route:
+const body = await request.json();
+const searchQuery = body.search || 'default';
+// ...use searchQuery in your Amazon URL...
+    console.log("printing search query");
+    console.log(searchQuery);
+    // const searchQuery = 'iphones';
     const amazonUrl = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
 
     await page.goto(amazonUrl, { waitUntil: 'domcontentloaded' });
