@@ -4,7 +4,11 @@ export default function Home() {
   return (
     <div>
        hello
-       Rishi
+       <p>loremdhshh
+        dddnjldwchd
+        jhcdhc
+        clddc
+       </p>
     </div>
   );
 }
