@@ -36,11 +36,18 @@ async function extractAmazonProducts(searchQuery) {
           price = priceWhole ? `$${priceWhole}${priceFraction ? '.' + priceFraction : ''}` : 'N/A';
         }
 
-        let url = await el.$eval('h2 a', (n) => n.getAttribute('href')).catch(() => null);
-        if (url && !url.startsWith('http')) {
-          url = `https://www.amazon.com${url}`;
-        }
-        if (!url) url = 'N/A';
+          let url = await el.$eval('h2 a', n => n.getAttribute('href')).catch(() => null);
+          if (url && !url.startsWith('http')) {
+            url = `https://www.amazon.com${url}`;
+          }
+          if (!url || url === 'N/A') {
+            // Try alternative selectors
+            url = await el.$eval('a.a-link-normal', n => n.getAttribute('href')).catch(() => null);
+            if (url && !url.startsWith('http')) {
+              url = `https://www.amazon.com${url}`;
+            }
+          }
+          if (!url) url = 'N/A';
 
         const rating = await el.$eval('.a-icon-alt', (n) => n.textContent.trim()).catch(() => 'N/A');
         const reviews = await el.$eval('.a-row.a-size-small span.a-size-base', (n) =>
