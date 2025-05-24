@@ -28,7 +28,7 @@ export default function Home() {
           style={{ flex: 1, padding: 8, fontSize: 16 }}
         />
         <button type="submit" style={{ padding: '8px 16px', fontSize: 16 }}>
-          Search
+          Search karo
         </button>
       </form>
     </main>
