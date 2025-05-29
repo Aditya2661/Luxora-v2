@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Navbar from './Navbar';
+import Footer from './Footer';
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -45,27 +46,29 @@ export default function Home() {
   };
 
   return (
-    <div className='bg-white h-screen'>
+<div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      <main className="max-w-xl mx-auto my-8 p-5 bg-white rounded shadow">
-  
-  <form onSubmit={handleSubmit} className="flex gap-2">
-    <input
-      type="text"
-      placeholder="Search for products..."
-      value={query}
-      onChange={e => setQuery(e.target.value)}
-      required
-      className="flex-1 px-3 py-2 text-base text-gray-900 border border-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    <button
-      type="submit"
-      className="px-4 py-2 text-base bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
-    >
-      Search karo
-    </button>
-  </form>
-</main>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="w-full max-w-xl p-5 bg-white rounded shadow">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search for products..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              required
+              className="flex-1 px-3 py-2 text-base text-gray-900 border border-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 text-base bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
+            >
+              Search karo
+            </button>
+          </form>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

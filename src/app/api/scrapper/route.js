@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { chromium } from 'playwright';
+import Redis from 'ioredis';
+
+// --- Redis Setup ---
+const redis = new Redis(process.env.REDIS_URL); // e.g.
 
 async function extractAmazonProducts(searchQuery) {
   const browser = await chromium.launch({ 
@@ -374,30 +378,37 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const searchQuery = body.search || 'iphones';
+    const cacheKey = `search:${searchQuery.toLowerCase()}`;
 
-    console.log(`🔍 Searching for: "${searchQuery}"`);
+    // 1. Try Redis cache first
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached), { status: 200 });
+    }
 
+    // 2. If not cached, scrape both sites
     const [amazonData, flipkartData] = await Promise.all([
       extractAmazonProducts(searchQuery),
       extractFlipkartProducts(searchQuery),
     ]);
-
-    console.log(`📊 Results - Amazon: ${amazonData.length}, Flipkart: ${flipkartData.length}`);
-
     const combined = [...amazonData, ...flipkartData];
-
-    return NextResponse.json({ 
+    const responseData = {
       data: combined,
       metadata: {
         amazon: amazonData.length,
         flipkart: flipkartData.length,
         total: combined.length
       }
-    }, { status: 200 });
+    };
+
+    // 3. Cache the result in Redis for 1 hour (3600 seconds)
+    await redis.set(cacheKey, JSON.stringify(responseData), 'EX', 3600);
+
+    return NextResponse.json(responseData, { status: 200 });
 
   } catch (error) {
     console.error('❌ Error in combined scraper:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: error.message,
       suggestion: 'One or both sites may have updated their structure. Check the logs for more details.'
     }, { status: 500 });

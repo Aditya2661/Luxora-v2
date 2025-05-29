@@ -2,11 +2,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import Navbar from '../Navbar';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
+
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+
 
 export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState(null);
@@ -22,7 +31,7 @@ export default function DashboardPage() {
       }
       const { data } = await supabase
         .from('users')
-        .select('name, email, phone_number')
+        .select('name, email, phone_number, created_at')
         .eq('id', user.id)
         .single();
       setUserProfile(data);
@@ -43,38 +52,51 @@ export default function DashboardPage() {
   );
 
   return (
-    <main className="max-w-lg mx-auto mt-12 p-8 rounded-xl bg-gray-50 shadow-lg relative">
-      {/* Logout Button - Top Left */}
-      <button
-        onClick={handleLogout}
-        className="absolute top-6 left-6 bg-red-500 hover:bg-red-600 text-white rounded px-4 py-2 font-bold shadow transition"
-      >
-        Logout
-      </button>
-      <h1 className="text-3xl font-extrabold text-center mb-8 text-blue-700">Dashboard</h1>
-      {userProfile ? (
-        <div className="mb-8 text-center space-y-3 bg-white rounded-lg p-6 shadow">
-          <div className="text-lg">
-            <span className="font-semibold text-gray-700">Name:</span> {userProfile.name}
+    <div className="bg-white min-h-screen">
+      <Navbar />
+      <main className=" ">
+        <div className="flex flex-col bg-gray-100 p-10 mx-5 md:flex-row gap-8">
+          {/* Left: User Info */}
+          <div className="flex-1 ">
+            <h1 className="text-3xl font-bold mb-8 text-gray-900">Dashboard</h1>
+            {userProfile ? (
+              <div className="space-y-3 bg-white rounded-lg p-6 shadow mb-6">
+                <div className="text-lg">
+                  <span className="font-semibold text-gray-800">Name: </span> <span className='text-gray-700'>{userProfile.name}</span>
+                </div>
+                <div className="text-lg">
+                  <span className="font-semibold text-gray-800">Email:</span> <span className='text-gray-700'>{userProfile.email}</span>
+                </div>
+                <div className="text-lg">
+                  <span className="font-semibold text-gray-800">Phone:</span> <span className='text-gray-700'>{userProfile.phone_number}</span>
+                </div>
+                <div className="text-lg">
+                  <span className="font-semibold text-black">Joined:</span> <span className='text-gray-700'>{formatDate(userProfile.created_at)}</span> 
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 mb-6">User profile not found.</div>
+            )}
+            {/* Buttons: Responsive row/column */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => router.push('/dashboard/likedItem')}
+                className="flex-1 px-6 py-2 border text-gray-800 border-solid-blue hover:bg-blue-700 hover:text-white rounded font-bold text-lg transition"
+              >
+                Liked Items
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-6 py-2 bg-red-500 border border-solid hover:border-red-900 hover:bg-gray-100  hover:text-red-800 text-white rounded font-bold text-lg transition"
+              >
+                Logout
+              </button>
+            </div>
           </div>
-          <div className="text-lg">
-            <span className="font-semibold text-gray-700">Email:</span> {userProfile.email}
-          </div>
-          <div className="text-lg">
-            <span className="font-semibold text-gray-700">Phone:</span> {userProfile.phone_number}
-          </div>
+          {/* Right: Empty for now */}
+          <div className="flex-1 hidden md:block" />
         </div>
-      ) : (
-        <div className="text-center text-gray-500">User profile not found.</div>
-      )}
-      <div className="text-center">
-        <button
-          onClick={() => router.push('/dashboard/likedItem')}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-lg transition"
-        >
-          View Liked Items
-        </button>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
