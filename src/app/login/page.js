@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -70,17 +72,22 @@ export default function LoginPage() {
           </form>
           <div className="mt-4 text-center text-gray-600">
             Don't have an account?{' '}
-            <a href="/signup" className="text-blue-600 hover:underline font-semibold">
+            <Link
+              href="/signUp"
+              className="text-blue-600 hover:underline font-semibold"
+            >
               Sign Up
-            </a>
+            </Link>
           </div>
         </div>
       </main>
       {/* Right Side Image (hidden on md and below) */}
       <div className="hidden lg:flex w-1/2 items-center justify-center bg-white">
-        <img
-          src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80"
+        <Image
+          src="/images/login_img.jpg"
           alt="Login Visual"
+          width={800}
+          height={800}
           className="max-w-full max-h-[80vh] object-contain"
         />
       </div>

@@ -2,21 +2,20 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import Image from 'next/image';
 import Navbar from '../Navbar';
+import Footer from '../Footer.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// You can use your own GIF/image URLs here:
-const LOADING_GIF = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3E4M3VtcjJueWlpYjE4enZ2aTNuMnliOG5tZ3VpMXdybzI4eGF5NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/kG3EDN0eXqq4V1Pd6W/giphy.gif";
-const CRYING_EMOJI = "https://em-content.zobj.net/source/microsoft-teams/363/loudly-crying-face_1f62d.png";
-const amazonLogo = "./images/amazon.jpg";
-const flipkartLogo = "./images/flip.jpg";
+const LOADING_GIF = "/images/giphy.webp";
+const CRYING_EMOJI = "/images/cry.png";
+const amazonLogo = "/images/amazon.jpg"; // Make sure these are in public/images/
+const flipkartLogo = "/images/flip.jpg";
 
-
-// Helper to get the correct logo based on source
 const getSourceLogo = (source) => {
   if (!source) return amazonLogo;
   const s = source.toLowerCase();
@@ -169,10 +168,10 @@ export default function SearchedItemPage() {
   return (
     <div className="min-h-screen w-full bg-white">
       <Navbar />
-      <main className="px-4 max-w-6xl mx-auto">
+      <main className="px-4 max-w-5xl mx-auto">
         <button
           onClick={() => router.push('/')}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition"
+          className="mb-6 mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >
           ← Go Back
         </button>
@@ -201,12 +200,14 @@ export default function SearchedItemPage() {
           </button>
         </div>
         {loading ? (
-          // Centered buffering GIF
+          // Centered loading GIF
           <div className="flex flex-col items-center justify-center min-h-[40vh]">
-            <img
+            <Image
               src={LOADING_GIF}
               alt="Loading..."
-              className="w-20 h-20 md:w-28 md:h-28"
+              width={112}
+              height={112}
+              className="w-28 h-28 object-contain"
             />
             <span className="mt-4 text-gray-700 text-lg font-semibold">Loading...</span>
           </div>
@@ -215,10 +216,12 @@ export default function SearchedItemPage() {
         ) : products.length === 0 ? (
           // Centered crying emoji and message
           <div className="flex flex-col items-center justify-center min-h-[40vh]">
-            <img
+            <Image
               src={CRYING_EMOJI}
               alt="No products found"
-              className="w-24 h-24 md:w-32 md:h-32"
+              width={128}
+              height={128}
+              className="w-32 h-32 object-contain"
             />
             <span className="mt-4 text-gray-600 text-xl font-semibold text-center">No products found</span>
           </div>
@@ -227,46 +230,44 @@ export default function SearchedItemPage() {
             {sortProducts(products, sort).map((p, i) => (
               <div
                 key={i}
-                className="relative flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-4"
+                className="relative flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-3"
               >
                 {/* Source Logo (top left corner) */}
                 <div className="absolute top-2 left-2 z-10 bg-white rounded shadow p-1">
-                  <img
+                  <Image
                     src={getSourceLogo(p.source)}
                     alt={p.source}
+                    width={24}
+                    height={24}
                     className="h-6 w-auto object-contain"
-                    style={{ display: 'block' }}
                   />
                 </div>
-
                 {/* Large Product Image */}
-                <img
+                <Image
                   src={p.image}
                   alt={p.title}
+                  width={192}
+                  height={192}
                   className="w-48 h-48 object-contain mb-3"
                 />
-
                 {/* Product Title */}
                 <a
                   href={p.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-semibold text-gray-800 text-lg text-center hover:text-blue-600 mb-2 line-clamp-2"
+                  className="text-gray-800 text-md text-center hover:text-blue-600 mb-1 line-clamp-2"
                 >
                   {p.title}
                 </a>
-
                 {/* Price (no "Price:" label) */}
                 <div className="mb-2 text-gray-600 font-semibold">
                   Price: {p.price}
                 </div>
-
                 {/* Vertical Rating and Reviews */}
                 <div className="flex flex-col items-center gap-1 mb-2 w-full">
                   <span className="text-sm text-gray-600">Rating: {p.rating}</span>
                   <span className="text-sm text-gray-600">Reviews: {p.reviews}</span>
                 </div>
-
                 {/* Buy Now Button */}
                 <a
                   href={p.url}
@@ -276,7 +277,6 @@ export default function SearchedItemPage() {
                 >
                   Buy Now
                 </a>
-
                 {/* Like Button */}
                 <button
                   onClick={() => handleLike(p)}
@@ -285,7 +285,6 @@ export default function SearchedItemPage() {
                 >
                   {liked[p.url] ? '♥' : '♡'}
                 </button>
-
                 {/* Add to Cart Button */}
                 <button
                   onClick={() => handleCart(p)}
@@ -300,6 +299,7 @@ export default function SearchedItemPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

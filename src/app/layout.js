@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
 import Footer from './Footer'
+import SplashScreen from './SplashScreen'
 // For App Router (src/app/layout.js)
 
 import { Poppins,Montserrat  } from 'next/font/google'
@@ -40,8 +41,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
       <body>
+         <SplashScreen/>
         {children}
-        {/* <Footer /> */}
+      
       </body>
     </html>
   );

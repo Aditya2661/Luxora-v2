@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import Image from 'next/image';
 import Footer from '../Footer';
 
 const supabase = createClient(
@@ -62,15 +63,15 @@ export default function CartPage() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-purple-50">
-      <main className="max-w-6xl mx-auto py-10 px-6 min-h-screen font-sans">
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
+      <main className="max-w-5xl mx-auto py-10 px-6 font-sans">
         <button
           onClick={() => router.push('/')}
-          className="mb-8 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold transition"
+          className="mb-5 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
         >
           ← Go Back
         </button>
-        <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-800">Your Cart</h1>
+        <h1 className="text-3xl font-bold mb-10 text-center text-gray-800">Your Cart</h1>
 
         {loading && <div className="text-lg text-gray-600">Loading...</div>}
 
@@ -82,27 +83,31 @@ export default function CartPage() {
           {cartItems.map((item) => (
             <div
               key={item.id}
-              className="relative bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg p-5 flex flex-col items-center text-center transition"
+              className="relative bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg p-5 flex flex-col items-center text-center transition"
             >
               {/* Source Logo (top left corner) */}
               <div className="absolute top-3 left-3 z-10 bg-white rounded shadow p-1">
-                <img
+                <Image
                   src={getSourceLogo(item.source)}
                   alt={item.source}
+                  width={24}
+                  height={24}
                   className="h-6 w-auto object-contain"
                 />
               </div>
 
-              <img
+              <Image
                 src={item.image_url}
                 alt={item.title}
+                width={160}
+                height={160}
                 className="w-40 h-40 object-contain mb-4"
               />
               <a
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-lg text-gray-900 mb-2 hover:underline line-clamp-2"
+                className="text-md text-gray-900 mb-2 hover:underline line-clamp-2"
               >
                 {truncateText(item.title, 60)}
               </a>
@@ -128,7 +133,7 @@ export default function CartPage() {
           ))}
         </div>
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
