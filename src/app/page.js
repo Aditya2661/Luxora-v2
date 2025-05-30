@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Navbar from './Navbar';
 import Footer from './Footer';
-// Initialize Supabase client
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -12,21 +12,16 @@ const supabase = createClient(
 
 export default function Home() {
   const [query, setQuery] = useState('');
-  const [user, setUser] = useState(undefined); // undefined: loading, null: not logged in, object: logged in
+  const [user, setUser] = useState(undefined);
   const router = useRouter();
 
-  // Check user authentication status on mount and on auth state change
   useEffect(() => {
     let mounted = true;
     supabase.auth.getUser().then(({ data }) => {
-      if (mounted) {
-        setUser(data.user ?? null);
-        console.log('Supabase user (on mount):', data.user);
-      }
+      if (mounted) setUser(data.user ?? null);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      console.log('Supabase user (onAuthStateChange):', session?.user ?? null);
     });
     return () => {
       mounted = false;
@@ -46,28 +41,57 @@ export default function Home() {
   };
 
   return (
-<div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white font-poppins">
       <Navbar />
-      <main className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-xl p-5 bg-white rounded shadow">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+      
+      {/* Hero Section */}
+      <section className="flex-1 bg-gradient-to-b from-blue-50 to-white py-16 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Find the Best Deals Online with <span className="text-blue-600">Luxora</span>
+          </h1>
+          <p className="text-lg text-gray-600 mb-8">
+            Compare products from Flipkart and Amazon in one place.
+          </p>
+
+          {/* Search Box */}
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center">
             <input
               type="text"
-              placeholder="Search for products..."
+              placeholder="Search for laptops, phones, gadgets..."
               value={query}
               onChange={e => setQuery(e.target.value)}
               required
-              className="flex-1 px-3 py-2 text-base text-gray-900 border border-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
-              className="px-4 py-2 text-base bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
+              className="px-6 py-3 bg-blue-600 text-white rounded-md text-base font-semibold hover:bg-blue-700 transition"
             >
               Search karo
             </button>
           </form>
+
+          
         </div>
-      </main>
+      </section>
+
+      <section className="bg-white py-10 px-4 border-t">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 text-center">
+          <div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">Compare Prices</h3>
+            <p className="text-gray-600 text-sm">Get the best prices across platforms instantly.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">Verified Listings</h3>
+            <p className="text-gray-600 text-sm">Only reliable products are shown, with real-time updates.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">Personal Dashboard</h3>
+            <p className="text-gray-600 text-sm">Track your searches, history and favorites easily.</p>
+          </div>
+        </div>
+      </section>
       <Footer />
     </div>
   );

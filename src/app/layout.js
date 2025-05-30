@@ -4,14 +4,19 @@ import Navbar from "./Navbar";
 import Footer from './Footer'
 // For App Router (src/app/layout.js)
 
-import { Poppins } from 'next/font/google'
+import { Poppins,Montserrat  } from 'next/font/google'
 
 const poppins = Poppins({
+  weight: ['400', '700'], // Choose the weights you want
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'], // Choose the weights you need
-  variable: '--font-poppins',
-  display: 'swap',
-})
+  variable: '--font-poppins', // CSS variable name
+});
+
+const montserrat = Montserrat({
+  weight: ['400', '700'], // Choose the weights you want
+  subsets: ['latin'],
+  variable: '--font-montserrat', // CSS variable name
+});
 
 
 
@@ -33,13 +38,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={poppins.className}>
-      <body className="flex flex-col min-h-screen">
-    
-        <main className="flex-1">{children}</main>
-      
+    <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
+      <body>
+        {children}
+        {/* <Footer /> */}
       </body>
     </html>
-  )
+  );
 }
-
