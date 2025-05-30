@@ -16,112 +16,101 @@ export default function LikedItemsPage() {
   useEffect(() => {
     const fetchLikedItems = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/'); // redirect if not logged in
-        return;
-      }
-      const { data, error } = await supabase
+      if (!user) return router.push('/');
+
+      const { data } = await supabase
         .from('liked_items')
         .select('*')
         .eq('user_id', user.id);
+
       setLikedItems(data || []);
       setLoading(false);
     };
     fetchLikedItems();
   }, [router]);
 
-  if (loading) return <div style={{ padding: 40 }}>Loading...</div>;
+  const handleRemove = async (itemId) => {
+    const { error } = await supabase
+      .from('liked_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (!error) {
+      setLikedItems((prev) => prev.filter(item => item.id !== itemId));
+    } else {
+      console.error('Error removing item:', error.message);
+    }
+  };
+
+  if (loading) return <div className="py-20 text-center text-gray-500 text-lg">Loading...</div>;
 
   return (
-    <main style={{ maxWidth: 1200, margin: '2rem auto', padding: 20 }}>
+    <div className='bg-white'>
+    <main className="max-w-6xl mx-auto py-10 px-6 bg-gradient-to-br from-yellow-50 to-pink-100 min-h-screen font-sans">
       <button
         onClick={() => router.push('/dashboard')}
-        style={{
-          marginBottom: 24,
-          padding: '8px 16px',
-          background: '#0070f3',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 4,
-          cursor: 'pointer',
-          fontWeight: 'bold'
-        }}
+        className="mb-8 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition"
       >
         ← Back to Dashboard
       </button>
-      <h1>Liked Items</h1>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(1, 1fr)',
-          gap: 24,
-        }}
-        className="product-grid"
-      >
-        {likedItems.map((item, i) => (
-          <div key={i} className="product-card" style={{
-            border: '1px solid #eee',
-            borderRadius: 8,
-            padding: 16,
-            background: '#fff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            <img src={item.image_url} alt={item.title} style={{ width: 150, height: 150, objectFit: 'contain', marginBottom: 12 }} />
-            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold', fontSize: 18, textAlign: 'center', color: '#222', marginBottom: 8 }}>{item.title}</a>
-            <div style={{ marginBottom: 4 }}>Price: {item.price}</div>
-            <div style={{ marginBottom: 4 }}>Rating: {item.rating}</div>
-            <div style={{ marginBottom: 8 }}>Reviews: {item.reviews}</div>
-            <div style={{
-              display: 'inline-block',
-              marginTop: 8,
-              padding: '4px 12px',
-              background: item.source === 'Amazon' ? '#232f3e' : '#2874f0',
-              color: '#fff',
-              borderRadius: 4,
-              fontSize: 14,
-              fontWeight: 'bold'
-            }}>
-              {item.source}
-            </div>
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-block',
-                marginTop: 8,
-                padding: '8px 16px',
-                background: '#ff9900',
-                color: '#fff',
-                borderRadius: 4,
-                textDecoration: 'none',
-                fontWeight: 'bold'
-              }}
+
+      <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-800">Liked Items</h1>
+
+      {likedItems.length === 0 ? (
+        <div className="text-center text-gray-500 text-lg">No liked items found.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {likedItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg p-5 flex flex-col items-center text-center transition"
             >
-              Buy Now
-            </a>
-          </div>
-        ))}
-      </div>
-      {/* Responsive grid styling */}
-      <style jsx>{`
-        @media (min-width: 600px) {
-          .product-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        @media (min-width: 900px) {
-          .product-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-          }
-        }
-      `}</style>
-      {!loading && likedItems.length === 0 && (
-        <div>No liked items found.</div>
+              <img
+                src={item.image_url}
+                alt={item.title}
+                className="w-40 h-40 object-contain mb-4"
+              />
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-lg text-gray-900 mb-2 hover:underline line-clamp-2"
+              >
+                {item.title}
+              </a>
+              <div className="text-sm text-gray-700 mb-1">💰 Price: {item.price}</div>
+              <div className="text-sm text-gray-700 mb-1">⭐ Rating: {item.rating}</div>
+              <div className="text-sm text-gray-700 mb-3">📝 Reviews: {item.reviews}</div>
+
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-semibold text-white mb-3 ${
+                  item.source === 'Amazon' ? 'bg-[#232f3e]' : 'bg-[#2874f0]'
+                }`}
+              >
+                {item.source}
+              </span>
+
+              <div className="flex gap-3 mt-auto">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md font-medium transition"
+                >
+                  Buy Now
+                </a>
+                <button
+                  onClick={() => handleRemove(item.id)}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md font-medium transition"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </main>
+    </div>
   );
 }

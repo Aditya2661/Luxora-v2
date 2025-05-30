@@ -27,7 +27,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // Nav items for logged in and not logged in
   const navLinks = user === undefined ? (
     <span className="text-gray-800 text-base">Loading...</span>
   ) : !user ? (
@@ -70,9 +69,14 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="flex justify-between items-center mx-5 px-8 py-4 bg-white border-b border-gray-200 mb-8">
+      <nav className="flex justify-between items-center mx-5 px-8 py-4 bg-white border-b border-gray-200 ">
         <div>
-          <span className="font-bold text-2xl text-blue-600">Luxora</span>
+          <button
+            onClick={() => router.push('/')}
+            className="font-bold text-2xl text-blue-600 hover:underline"
+          >
+            Luxora
+          </button>
         </div>
         {/* Desktop Nav */}
         <div className="hidden md:flex gap-6">
@@ -130,16 +134,25 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Side menu for mobile */}
+      {/* Overlay for mobile menu */}
       <div
         className={`fixed inset-0 z-50 bg-black bg-opacity-40 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMenuOpen(false)}
         aria-hidden={!menuOpen}
       />
 
+      {/* Mobile Side Menu */}
       <aside className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-[60] transform transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'} md:hidden`}>
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <span className="font-bold text-xl text-blue-600">Luxora</span>
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              router.push('/');
+            }}
+            className="font-bold text-xl text-blue-600 hover:underline"
+          >
+            Luxora
+          </button>
           <button
             onClick={() => setMenuOpen(false)}
             className="text-gray-800 focus:outline-none"
