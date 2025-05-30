@@ -10,8 +10,19 @@ const supabase = createClient(
 );
 
 // You can use your own GIF/image URLs here:
-const LOADING_GIF = "https://cdn.jsdelivr.net/gh/napthedev/assets-cdn/buffering-dark.gif";
+const LOADING_GIF = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3E4M3VtcjJueWlpYjE4enZ2aTNuMnliOG5tZ3VpMXdybzI4eGF5NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/kG3EDN0eXqq4V1Pd6W/giphy.gif";
 const CRYING_EMOJI = "https://em-content.zobj.net/source/microsoft-teams/363/loudly-crying-face_1f62d.png";
+const amazonLogo = "./images/amazon.jpg";
+const flipkartLogo = "./images/flip.jpg";
+
+
+// Helper to get the correct logo based on source
+const getSourceLogo = (source) => {
+  if (!source) return amazonLogo;
+  const s = source.toLowerCase();
+  if (s.includes('flipkart')) return flipkartLogo;
+  return amazonLogo;
+};
 
 export default function SearchedItemPage() {
   const { searched_item } = useParams();
@@ -21,6 +32,7 @@ export default function SearchedItemPage() {
   const [error, setError] = useState('');
   const [liked, setLiked] = useState({});
   const [carted, setCarted] = useState({});
+  const [sort, setSort] = useState('none'); // 'none', 'lowToHigh', 'highToLow'
 
   // Fetch products
   useEffect(() => {
@@ -128,19 +140,66 @@ export default function SearchedItemPage() {
     }
   };
 
+  // Price sorting function
+  function sortProducts(products, sort) {
+    if (sort === 'none') return products;
+
+    // Helper to extract price as a number (or null if invalid)
+    const getPrice = (prod) => {
+      if (!prod.price || prod.price === 'N/A') return null;
+      return parseFloat(prod.price.replace(/[^0-9.-]+/g, '') || 0);
+    };
+
+    return [...products].sort((a, b) => {
+      const priceA = getPrice(a);
+      const priceB = getPrice(b);
+
+      // Both prices valid: sort by price
+      if (priceA !== null && priceB !== null) {
+        return sort === 'lowToHigh' ? priceA - priceB : priceB - priceA;
+      }
+      // Only one price valid: valid price first
+      if (priceA === null && priceB !== null) return 1;
+      if (priceA !== null && priceB === null) return -1;
+      // Both prices invalid: keep original order
+      return 0;
+    });
+  }
+
   return (
     <div className="min-h-screen w-full bg-white">
       <Navbar />
-      <main className="px-4 max-w-7xl mx-auto">
+      <main className="px-4 max-w-6xl mx-auto">
         <button
           onClick={() => router.push('/')}
           className="mb-6 px-4 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 transition"
         >
           ← Go Back
         </button>
-        <h1 className="text-gray-800 text-l font-bold mb-6">
+        <h1 className="text-gray-800 text-l font-bold mb-2">
           Results for: <span className="text-blue-600">{searched_item}</span>
         </h1>
+        {/* Price Sort Controls */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setSort('lowToHigh')}
+            className={`px-3 py-1 rounded text-sm font-medium ${sort === 'lowToHigh' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+          >
+            Price: Low to High
+          </button>
+          <button
+            onClick={() => setSort('highToLow')}
+            className={`px-3 py-1 rounded text-sm font-medium ${sort === 'highToLow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+          >
+            Price: High to Low
+          </button>
+          <button
+            onClick={() => setSort('none')}
+            className={`px-3 py-1 rounded text-sm font-medium ${sort === 'none' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+          >
+            Reset
+          </button>
+        </div>
         {loading ? (
           // Centered buffering GIF
           <div className="flex flex-col items-center justify-center min-h-[40vh]">
@@ -164,56 +223,81 @@ export default function SearchedItemPage() {
             <span className="mt-4 text-gray-600 text-xl font-semibold text-center">No products found</span>
           </div>
         ) : (
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 bg-gray-300 lg:grid-cols-3 gap-5">
-  {products.map((p, i) => (
-    <div
-      key={i}
-      className="relative flex flex-col items-center bg-white border border-gray-200 rounded-md shadow hover:shadow-lg transition p-3"
-    >
-      <img src={p.image} alt={p.title} className="w-28 h-28 object-contain mb-2" />
-      <a
-        href={p.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-semibold text-gray-800 text-base text-center hover:text-blue-600 mb-1 line-clamp-2"
-      >
-        {p.title}
-      </a>
-      <div className="mb-0.5 text-sm">
-        Price: <span className="text-gray-700 font-semibold">{p.price}</span>
-      </div>
-      <div className="text-gray-500 mb-0.5 text-sm">Rating: {p.rating}</div>
-      <div className="text-gray-500 mb-1 text-sm">Reviews: {p.reviews}</div>
-      <a
-        href={p.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-block mt-1 px-3 py-1.5 bg-orange-500 text-white rounded font-bold text-sm hover:bg-yellow-600 transition"
-      >
-        Buy Now
-      </a>
-      {/* Like Button */}
-      <button
-        onClick={() => handleLike(p)}
-        className={`absolute top-2 right-10 text-xl transition ${liked[p.url] ? 'text-pink-600' : 'text-gray-400 hover:text-pink-400'}`}
-        aria-label={liked[p.url] ? "Unlike" : "Like"}
-      >
-        {liked[p.url] ? '♥' : '♡'}
-      </button>
-      {/* Add to Cart Button */}
-      <button
-        onClick={() => handleCart(p)}
-        className={`absolute top-2 right-2 text-xl transition ${carted[p.url] ? 'text-blue-600' : 'text-gray-400 hover:text-blue-400'}`}
-        aria-label={carted[p.url] ? "Remove from cart" : "Add to cart"}
-        title={carted[p.url] ? "Remove from cart" : "Add to cart"}
-      >
-        {carted[p.url] ? '🛒' : '🛍️'}
-      </button>
-    </div>
-  ))}
-</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortProducts(products, sort).map((p, i) => (
+              <div
+                key={i}
+                className="relative flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-4"
+              >
+                {/* Source Logo (top left corner) */}
+                <div className="absolute top-2 left-2 z-10 bg-white rounded shadow p-1">
+                  <img
+                    src={getSourceLogo(p.source)}
+                    alt={p.source}
+                    className="h-6 w-auto object-contain"
+                    style={{ display: 'block' }}
+                  />
+                </div>
 
+                {/* Large Product Image */}
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  className="w-48 h-48 object-contain mb-3"
+                />
+
+                {/* Product Title */}
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-gray-800 text-lg text-center hover:text-blue-600 mb-2 line-clamp-2"
+                >
+                  {p.title}
+                </a>
+
+                {/* Price (no "Price:" label) */}
+                <div className="mb-2 text-gray-600 font-semibold">
+                  Price: {p.price}
+                </div>
+
+                {/* Vertical Rating and Reviews */}
+                <div className="flex flex-col items-center gap-1 mb-2 w-full">
+                  <span className="text-sm text-gray-600">Rating: {p.rating}</span>
+                  <span className="text-sm text-gray-600">Reviews: {p.reviews}</span>
+                </div>
+
+                {/* Buy Now Button */}
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg font-bold text-center hover:bg-orange-600 transition"
+                >
+                  Buy Now
+                </a>
+
+                {/* Like Button */}
+                <button
+                  onClick={() => handleLike(p)}
+                  className={`absolute top-2 right-12 text-2xl transition ${liked[p.url] ? 'text-pink-600' : 'text-gray-400 hover:text-pink-400'}`}
+                  aria-label={liked[p.url] ? "Unlike" : "Like"}
+                >
+                  {liked[p.url] ? '♥' : '♡'}
+                </button>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => handleCart(p)}
+                  className={`absolute top-2 right-4 text-2xl transition ${carted[p.url] ? 'text-blue-600' : 'text-gray-400 hover:text-blue-400'}`}
+                  aria-label={carted[p.url] ? "Remove from cart" : "Add to cart"}
+                  title={carted[p.url] ? "Remove from cart" : "Add to cart"}
+                >
+                  {carted[p.url] ? '🛒' : '🛍️'}
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </main>
     </div>
