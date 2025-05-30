@@ -71,7 +71,9 @@ export default function LoginPage() {
             {error && <div className="text-red-600 text-sm">{error}</div>}
           </form>
           <div className="mt-4 text-center text-gray-600">
-            Don't have an account?{' '}
+           
+            Don&#39;t have an account? ...
+
             <Link
               href="/signUp"
               className="text-blue-600 hover:underline font-semibold"
