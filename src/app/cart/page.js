@@ -15,6 +15,14 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength) + "...";
 }
 
+// Helper to get the correct logo based on source
+const getSourceLogo = (source) => {
+  if (!source) return '/images/amazon.jpg';
+  const s = source.toLowerCase();
+  if (s.includes('flipkart')) return '/images/flip.jpg';
+  return '/images/amazon.jpg';
+};
+
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,8 +62,8 @@ export default function CartPage() {
   };
 
   return (
-    <div className="bg-white">
-      <main className="max-w-6xl mx-auto py-10 px-6 bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen font-sans">
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50">
+      <main className="max-w-6xl mx-auto py-10 px-6 min-h-screen font-sans">
         <button
           onClick={() => router.push('/')}
           className="mb-8 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold transition"
@@ -74,8 +82,17 @@ export default function CartPage() {
           {cartItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg p-5 flex flex-col items-center text-center transition"
+              className="relative bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg p-5 flex flex-col items-center text-center transition"
             >
+              {/* Source Logo (top left corner) */}
+              <div className="absolute top-3 left-3 z-10 bg-white rounded shadow p-1">
+                <img
+                  src={getSourceLogo(item.source)}
+                  alt={item.source}
+                  className="h-6 w-auto object-contain"
+                />
+              </div>
+
               <img
                 src={item.image_url}
                 alt={item.title}
@@ -91,16 +108,7 @@ export default function CartPage() {
               </a>
               <div className="text-sm text-gray-700 mb-1">💰 Price: {item.price}</div>
               <div className="text-sm text-gray-700 mb-1">⭐ Rating: {item.rating}</div>
-              <div className="text-sm text-gray-700 mb-1">📝 Reviews: {item.reviews}</div>
-              <div className="text-sm text-gray-700 mb-3">📦 Quantity: {item.quantity}</div>
-
-              <span
-                className={`px-3 py-1 rounded-md text-sm font-semibold text-white mb-3 ${
-                  item.source === 'Amazon' ? 'bg-[#232f3e]' : 'bg-[#2874f0]'
-                }`}
-              >
-                {item.source}
-              </span>
+              <div className="text-sm text-gray-700 mb-2">📝 Reviews: {item.reviews}</div>
 
               <div className="flex gap-3 mt-auto">
                 <button

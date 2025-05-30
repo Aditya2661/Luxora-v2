@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Navbar from '../Navbar';
+import Footer from '../Footer';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -46,8 +47,13 @@ export default function DashboardPage() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-[40vh]">
-      <span className="text-gray-500 text-lg">Loading...</span>
+    <div className="flex items-center justify-center min-h-screen bg-white">
+    <img
+      src="https://media.giphy.com/media/swhRkVYLJDrCE/giphy.gif?cid=ecf05e47ym6t64gyyu4lnhjzk458y2lks75nifdnmh28a7us&ep=v1_gifs_search&rid=giphy.gif&ct=g"
+      alt="Loading..."
+      className="h-60 w-50 object-contain"
+      style={{ background: 'white', borderRadius: '4px', padding: '2px' }}
+    />
     </div>
   );
 
@@ -97,6 +103,7 @@ export default function DashboardPage() {
           <div className="flex-1 hidden md:block" />
         </div>
       </main>
+      <Footer/>
     </div>
   );
 }
